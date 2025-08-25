@@ -1,43 +1,46 @@
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MauiAppMinhasCompras.MainPage"
-             Title="Minhas Compras">
+using MauiAppMinhasCompras.Models;
+using System;
+using System.Collections.Generic;
+using Microsoft.Maui.Controls;
 
-    <VerticalStackLayout Padding="20" Spacing="10">
+namespace MauiAppMinhasCompras
+{
+    public partial class MainPage : ContentPage
+    {
+        public MainPage()
+        {
+            InitializeComponent();
+            CarregarProdutos();
+        }
 
-        <Label Text="Cadastrar Produto"
-               FontSize="24"
-               HorizontalOptions="Center"/>
+        private async void Salvar_Clicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(descricaoEntry.Text) || string.IsNullOrWhiteSpace(quantidadeEntry.Text) || string.IsNullOrWhiteSpace(precoEntry.Text))
+            {
+                await DisplayAlert("Erro", "Preencha todos os campos", "OK");
+                return;
+            }
 
-        <Entry x:Name="entryDescricao"
-               Placeholder="Descrição do Produto"/>
+            var produto = new Produto
+            {
+                Descricao = descricaoEntry.Text,
+                Quantidade = int.Parse(quantidadeEntry.Text),
+                Preco = double.Parse(precoEntry.Text)
+            };
 
-        <Entry x:Name="entryQuantidade"
-               Placeholder="Quantidade"
-               Keyboard="Numeric"/>
+            await App.Db.Insert(produto);
 
-        <Entry x:Name="entryPreco"
-               Placeholder="Preço"
-               Keyboard="Numeric"/>
+            descricaoEntry.Text = "";
+            quantidadeEntry.Text = "";
+            precoEntry.Text = "";
 
-        <Button Text="Salvar"
-                Clicked="OnSalvarClicked"/>
+            CarregarProdutos();
+        }
 
-        <Label Text="Produtos Registrados:" FontAttributes="Bold" />
-
-        <CollectionView x:Name="collectionProdutos">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame BorderColor="Gray" Padding="5" Margin="5">
-                        <VerticalStackLayout>
-                            <Label Text="{Binding Descricao}" FontAttributes="Bold"/>
-                            <Label Text="Qtd: {Binding Quantidade}"/>
-                            <Label Text="{Binding Preco, StringFormat='R$ {0:F2}'}"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-
-    </VerticalStackLayout>
-</ContentPage>
+        private async void CarregarProdutos()
+        {
+            var produtos = await App.Db.GetAll();
+            produtosListView.ItemsSource = produtos;
+        }
+    }
+}

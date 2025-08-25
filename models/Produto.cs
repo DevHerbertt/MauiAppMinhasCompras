@@ -1,16 +1,11 @@
-using SQLite;
-
 namespace MauiAppMinhasCompras.Models
 {
     public class Produto
     {
-        [PrimaryKey, AutoIncrement]
+        [SQLite.PrimaryKey, SQLite.AutoIncrement]
         public int Id { get; set; }
-
         public string Descricao { get; set; }
-
         public int Quantidade { get; set; }
-
-        public decimal Preco { get; set; }
+        public double Preco { get; set; }
     }
 }
