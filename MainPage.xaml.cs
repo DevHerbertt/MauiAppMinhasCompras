@@ -1,47 +1,46 @@
 using MauiAppMinhasCompras.Models;
+using System;
+using System.Collections.Generic;
+using Microsoft.Maui.Controls;
 
-namespace MauiAppMinhasCompras;
-
-public partial class MainPage : ContentPage
+namespace MauiAppMinhasCompras
 {
-    public MainPage()
+    public partial class MainPage : ContentPage
     {
-        InitializeComponent();
-        CarregarProdutos();
-    }
-
-    private async void OnSalvarClicked(object sender, EventArgs e)
-    {
-        if (!string.IsNullOrWhiteSpace(entryDescricao.Text)
-            && int.TryParse(entryQuantidade.Text, out int qtd)
-            && decimal.TryParse(entryPreco.Text, out decimal preco))
+        public MainPage()
         {
+            InitializeComponent();
+            CarregarProdutos();
+        }
+
+        private async void Salvar_Clicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(descricaoEntry.Text) || string.IsNullOrWhiteSpace(quantidadeEntry.Text) || string.IsNullOrWhiteSpace(precoEntry.Text))
+            {
+                await DisplayAlert("Erro", "Preencha todos os campos", "OK");
+                return;
+            }
+
             var produto = new Produto
             {
-                Descricao = entryDescricao.Text,
-                Quantidade = qtd,
-                Preco = preco
+                Descricao = descricaoEntry.Text,
+                Quantidade = int.Parse(quantidadeEntry.Text),
+                Preco = double.Parse(precoEntry.Text)
             };
 
             await App.Db.Insert(produto);
 
-            await DisplayAlert("Sucesso", "Produto registrado!", "OK");
-
-            entryDescricao.Text = string.Empty;
-            entryQuantidade.Text = string.Empty;
-            entryPreco.Text = string.Empty;
+            descricaoEntry.Text = "";
+            quantidadeEntry.Text = "";
+            precoEntry.Text = "";
 
             CarregarProdutos();
         }
-        else
-        {
-            await DisplayAlert("Erro", "Preencha todos os campos corretamente!", "OK");
-        }
-    }
 
-    private async void CarregarProdutos()
-    {
-        var lista = await App.Db.GetAll();
-        collectionProdutos.ItemsSource = lista;
+        private async void CarregarProdutos()
+        {
+            var produtos = await App.Db.GetAll();
+            produtosListView.ItemsSource = produtos;
+        }
     }
 }
